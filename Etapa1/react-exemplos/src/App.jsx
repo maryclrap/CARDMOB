@@ -60,6 +60,7 @@ function App() {
 
   return (
     <>
+    <TodoList name="CARDMOB"/>
     <Counter title="Contando..." />
     <Counter initial="100" />
     {/*<article>
@@ -78,6 +79,8 @@ function App() {
       <button onClick={() => setAlbumId(3)}>Album #3</button>
       <button onClick={() => setAlbumId(4)}>Album #4</button>
     </div>
+
+    <Album albumId={albumId}></Album>
     </>
   )
 }
