@@ -8,7 +8,7 @@ const TodoList = ({ name }) => {
 
     const addTodo = () => {
         if (task.trim() === "") return;
-        setTodo([...todos, {id: Date.now, text: task}]);
+        setTodo([...todos, {id: Date.now(), text: task}]);
         setTask("");
     }
 
