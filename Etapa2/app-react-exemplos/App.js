@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row',a
   },
   input: {
     height: 40,
