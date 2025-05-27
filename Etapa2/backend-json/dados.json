@@ -1,12 +1,20 @@
 {
   "items": [
     {
-      "id": "f058",
+      "id": "1e86",
+      "text": "Leite"
+    },
+    {
+      "text": "Farinha",
+      "id": "bccf"
+    },
+    {
+      "id": "1859",
       "text": "Novo item"
     },
     {
-      "id": "4548",
-      "text": "Novo item"
+      "id": "0c21",
+      "text": "Arroz"
     }
   ]
 }
