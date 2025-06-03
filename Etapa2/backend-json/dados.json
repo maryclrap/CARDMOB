@@ -8,5 +8,22 @@
       "id": "4548",
       "text": "Novo item"
     }
+  ],
+  "compras": [
+    {
+      "id": "6fca",
+      "item": "Leite",
+      "quantidade": 3
+    },
+    {
+      "id": "efb7",
+      "item": "Arroz",
+      "quantidade": 2
+    },
+    {
+      "id": "a5a8",
+      "item": "Arroz",
+      "quantidade": 2
+    }
   ]
 }
