@@ -1,50 +1,95 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, TextInput, FlatList, Alert } from 'react-native';
 
+const BASE_URL = 'http://10.0.2.2:3000/compras'; // Para emulador Android. Use o IP correto para dispositivos físicos.
+
 export default function App() {
-  const [itens, setItens] = useState([]); // Simula o conteúdo do dados.json
+  const [itens, setItens] = useState([]);
   const [item, setItem] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [idEditar, setIdEditar] = useState(null);
   const [itemEditar, setItemEditar] = useState('');
   const [quantidadeEditar, setQuantidadeEditar] = useState('');
 
-  const adicionarItem = () => {
+  useEffect(() => {
+    buscarItens();
+  }, []);
+
+  const buscarItens = async () => {
+    try {
+      const response = await fetch(BASE_URL);
+      const data = await response.json();
+      setItens(data);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar os itens.');
+    }
+  };
+
+  const adicionarItem = async () => {
     if (!item || !quantidade) {
       Alert.alert('Erro', 'Preencha todos os campos.');
       return;
     }
 
-    const novoItem = {
-      id: itens.length > 0 ? itens[itens.length - 1].id + 1 : 1,
-      item,
-      quantidade: parseInt(quantidade),
-    };
+    try {
+      const response = await fetch(BASE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item, quantidade: parseInt(quantidade) }),
+      });
 
-    setItens([...itens, novoItem]);
-    setItem('');
-    setQuantidade('');
+      if (response.ok) {
+        buscarItens(); // Atualiza a lista de itens
+        setItem('');
+        setQuantidade('');
+      } else {
+        Alert.alert('Erro', 'Não foi possível adicionar o item.');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível adicionar o item. Verifique sua conexão com o backend.');
+    }
   };
 
-  const atualizarItem = () => {
+  const atualizarItem = async () => {
     if (!itemEditar || !quantidadeEditar) {
       Alert.alert('Erro', 'Preencha todos os campos.');
       return;
     }
 
-    const itensAtualizados = itens.map((i) =>
-      i.id === idEditar ? { id: idEditar, item: itemEditar, quantidade: parseInt(quantidadeEditar) } : i
-    );
+    try {
+      const response = await fetch(`${BASE_URL}/${idEditar}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item: itemEditar, quantidade: parseInt(quantidadeEditar) }),
+      });
 
-    setItens(itensAtualizados);
-    setIdEditar(null);
-    setItemEditar('');
-    setQuantidadeEditar('');
+      if (response.ok) {
+        buscarItens();
+        setIdEditar(null);
+        setItemEditar('');
+        setQuantidadeEditar('');
+      } else {
+        Alert.alert('Erro', 'Não foi possível atualizar o item.');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível atualizar o item.');
+    }
   };
 
-  const excluirItem = (id) => {
-    const itensFiltrados = itens.filter((i) => i.id !== id);
-    setItens(itensFiltrados);
+  const excluirItem = async (id) => {
+    try {
+      const response = await fetch(`${BASE_URL}/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        buscarItens();
+      } else {
+        Alert.alert('Erro', 'Não foi possível excluir o item.');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível excluir o item.');
+    }
   };
 
   const editarItem = (item) => {
