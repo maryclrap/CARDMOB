@@ -1,157 +1,186 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Button, TextInput, FlatList, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View, Text, TextInput, FlatList, TouchableOpacity, Alert, StyleSheet,
+} from 'react-native';
 
-const BASE_URL = 'http://10.0.2.2:3000/compras'; // Para emulador Android. Use o IP correto para dispositivos físicos.
+const BASE_URL = 'http://10.81.205.1:5000';
 
 export default function App() {
-  const [itens, setItens] = useState([]);
-  const [item, setItem] = useState('');
-  const [quantidade, setQuantidade] = useState('');
-  const [idEditar, setIdEditar] = useState(null);
-  const [itemEditar, setItemEditar] = useState('');
-  const [quantidadeEditar, setQuantidadeEditar] = useState('');
+  const [produtos, setProdutos] = useState([]);
+  const [nome, setNome] = useState('');
+  const [descricao, setDescricao] = useState('');
+  const [preco, setPreco] = useState('');
+  const [editandoId, setEditandoId] = useState(null);
 
   useEffect(() => {
-    buscarItens();
+    carregarProdutos();
   }, []);
 
-  const buscarItens = async () => {
+  const carregarProdutos = async () => {
     try {
-      const response = await fetch(BASE_URL);
+      const response = await fetch(`${BASE_URL}/api/catalog`);
       const data = await response.json();
-      setItens(data);
+      setProdutos(data);
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível carregar os itens.');
+      Alert.alert('Erro', 'Erro ao carregar produtos.');
     }
   };
 
-  const adicionarItem = async () => {
-    if (!item || !quantidade) {
+  const adicionarProduto = async () => {
+    if (!nome || !descricao || !preco) {
       Alert.alert('Erro', 'Preencha todos os campos.');
       return;
     }
 
     try {
-      const response = await fetch(BASE_URL, {
+      const response = await fetch(`${BASE_URL}/api/catalog`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item, quantidade: parseInt(quantidade) }),
+        body: JSON.stringify({ name: nome, description: descricao, price: parseFloat(preco) }),
       });
 
       if (response.ok) {
-        buscarItens(); // Atualiza a lista de itens
-        setItem('');
-        setQuantidade('');
+        carregarProdutos();
+        setNome('');
+        setDescricao('');
+        setPreco('');
       } else {
-        Alert.alert('Erro', 'Não foi possível adicionar o item.');
+        Alert.alert('Erro', 'Erro ao adicionar produto.');
       }
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível adicionar o item. Verifique sua conexão com o backend.');
+      Alert.alert('Erro', 'Erro ao conectar com o servidor.');
     }
   };
 
-  const atualizarItem = async () => {
-    if (!itemEditar || !quantidadeEditar) {
+  const confirmarExclusao = (id) => {
+    Alert.alert(
+      'Confirmação',
+      'Tem certeza que deseja excluir este produto?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Excluir', onPress: () => excluirProduto(id) },
+      ]
+    );
+  };
+
+  const excluirProduto = async (id) => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/catalog/${id}`, { method: 'DELETE' });
+      if (response.ok) carregarProdutos();
+      else Alert.alert('Erro', 'Erro ao excluir produto.');
+    } catch (error) {
+      Alert.alert('Erro', 'Erro ao conectar com o servidor.');
+    }
+  };
+
+  const editarProduto = (produto) => {
+    setNome(produto.name);
+    setDescricao(produto.description);
+    setPreco(produto.price.toString());
+    setEditandoId(produto.id);
+  };
+
+  const atualizarProduto = async () => {
+    if (!nome || !descricao || !preco) {
       Alert.alert('Erro', 'Preencha todos os campos.');
       return;
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/${idEditar}`, {
-        method: 'PUT',
+      const response = await fetch(`${BASE_URL}/api/catalog/${editandoId}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item: itemEditar, quantidade: parseInt(quantidadeEditar) }),
+        body: JSON.stringify({ name: nome, description: descricao, price: parseFloat(preco) }),
       });
 
       if (response.ok) {
-        buscarItens();
-        setIdEditar(null);
-        setItemEditar('');
-        setQuantidadeEditar('');
+        carregarProdutos();
+        setNome('');
+        setDescricao('');
+        setPreco('');
+        setEditandoId(null);
       } else {
-        Alert.alert('Erro', 'Não foi possível atualizar o item.');
+        Alert.alert('Erro', 'Erro ao atualizar produto.');
       }
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível atualizar o item.');
+      Alert.alert('Erro', 'Erro ao conectar com o servidor.');
     }
   };
 
-  const excluirItem = async (id) => {
-    try {
-      const response = await fetch(`${BASE_URL}/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        buscarItens();
-      } else {
-        Alert.alert('Erro', 'Não foi possível excluir o item.');
-      }
-    } catch (error) {
-      Alert.alert('Erro', 'Não foi possível excluir o item.');
-    }
-  };
-
-  const editarItem = (item) => {
-    setIdEditar(item.id);
-    setItemEditar(item.item);
-    setQuantidadeEditar(item.quantidade.toString());
-  };
-
-  const renderizarItem = ({ item }) => {
-    if (item.id !== idEditar) {
-      return (
-        <View style={styles.item}>
-          <Text>{item.item} - {item.quantidade}</Text>
+  const renderProduto = ({ item }) => (
+    <View style={styles.produto}>
+      {item.id !== editandoId ? (
+        <>
+          <Text style={styles.produtoTexto}>{item.name} - {item.description} - R$ {item.price.toFixed(2)}</Text>
           <View style={styles.botoes}>
-            <Button title="Editar" onPress={() => editarItem(item)} />
-            <Button title="Excluir" onPress={() => excluirItem(item.id)} />
+            <TouchableOpacity style={styles.botaoEditar} onPress={() => editarProduto(item)}>
+              <Text style={styles.botaoTexto}>Editar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.botaoExcluir} onPress={() => confirmarExclusao(item.id)}>
+              <Text style={styles.botaoTexto}>Excluir</Text>
+            </TouchableOpacity>
           </View>
-        </View>
-      );
-    } else {
-      return (
-        <View style={styles.item}>
+        </>
+      ) : (
+        <>
           <TextInput
             style={styles.input}
-            placeholder="Nome do item"
-            value={itemEditar}
-            onChangeText={setItemEditar}
+            placeholder="Nome"
+            value={nome}
+            onChangeText={setNome}
           />
           <TextInput
             style={styles.input}
-            placeholder="Quantidade"
-            value={quantidadeEditar}
-            onChangeText={setQuantidadeEditar}
+            placeholder="Descrição"
+            value={descricao}
+            onChangeText={setDescricao}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Preço"
+            value={preco}
+            onChangeText={setPreco}
             keyboardType="numeric"
           />
-          <Button title="Atualizar" onPress={atualizarItem} />
-        </View>
-      );
-    }
-  };
+          <TouchableOpacity style={styles.botaoAtualizar} onPress={atualizarProduto}>
+            <Text style={styles.botaoTexto}>Atualizar</Text>
+          </TouchableOpacity>
+        </>
+      )}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Lista de Compras</Text>
+      <Text style={styles.titulo}>Catálogo de Produtos</Text>
       <TextInput
         style={styles.input}
-        placeholder="Nome do item"
-        value={item}
-        onChangeText={setItem}
+        placeholder="Nome"
+        value={nome}
+        onChangeText={setNome}
       />
       <TextInput
         style={styles.input}
-        placeholder="Quantidade"
-        value={quantidade}
-        onChangeText={setQuantidade}
+        placeholder="Descrição"
+        value={descricao}
+        onChangeText={setDescricao}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Preço"
+        value={preco}
+        onChangeText={setPreco}
         keyboardType="numeric"
       />
-      <Button title="Adicionar Item" onPress={adicionarItem} />
+      <TouchableOpacity style={styles.botaoAdicionar} onPress={editandoId ? atualizarProduto : adicionarProduto}>
+        <Text style={styles.botaoTexto}>{editandoId ? 'Atualizar Produto' : 'Adicionar Produto'}</Text>
+      </TouchableOpacity>
       <FlatList
-        data={itens}
+        data={produtos}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={renderizarItem}
+        renderItem={renderProduto}
+        nestedScrollEnabled={true} // Resolve o problema de listas aninhadas
+        keyboardShouldPersistTaps="handled" // Permite interações mesmo com o teclado aberto
       />
     </View>
   );
@@ -175,15 +204,51 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 5,
   },
-  item: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  botaoAdicionar: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 8,
     alignItems: 'center',
+    marginBottom: 20,
+  },
+  botaoAtualizar: {
+    backgroundColor: '#28a745',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  produto: {
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
+  produtoTexto: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
   botoes: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  botaoEditar: {
+    backgroundColor: '#ffc107',
+    padding: 10,
+    borderRadius: 8,
+    flex: 1,
+    marginRight: 8,
+    alignItems: 'center',
+  },
+  botaoExcluir: {
+    backgroundColor: '#dc3545',
+    padding: 10,
+    borderRadius: 8,
+    flex: 1,
+    marginLeft: 8,
+    alignItems: 'center',
+  },
+  botaoTexto: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
