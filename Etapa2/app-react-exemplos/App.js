@@ -179,9 +179,9 @@ export default function App() {
         data={produtos}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderProduto}
-        nestedScrollEnabled={true} // Resolve o problema de listas aninhadas
-        keyboardShouldPersistTaps="handled" // Permite interações mesmo com o teclado aberto
-      />
+        nestedScrollEnabled={true}
+        keyboardShouldPersistTaps="handled" 
+      /> 
     </View>
   );
 }
