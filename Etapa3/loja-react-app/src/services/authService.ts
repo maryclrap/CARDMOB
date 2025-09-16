@@ -1,6 +1,6 @@
 import Config from "react-native-config";
 
-const API_URL = 'http://10.81.205.50:5000';
+const API_URL = 'http://10.81.205.1:5000';
 
 export async function fakeLogin(email: string, password: string): Promise<string> {
     if (email === 'teste@example.com' && password === '123') {
