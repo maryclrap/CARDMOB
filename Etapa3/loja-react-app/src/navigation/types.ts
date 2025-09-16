@@ -1,8 +1,8 @@
-
 import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type TabParamList = {
   Catalog: undefined,
+  Cart: undefined,
   Settings: undefined,
   Register: undefined,
 };
