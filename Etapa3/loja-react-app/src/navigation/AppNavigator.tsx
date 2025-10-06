@@ -16,6 +16,7 @@ import CartScreen from "../screens/cart/CartScreen";
 const AppStack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
+
 function TabNavigator() {
     return (
         <Tab.Navigator
