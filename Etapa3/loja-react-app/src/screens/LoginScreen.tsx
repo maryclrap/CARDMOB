@@ -22,8 +22,8 @@ export default function LoginScreen({ navigation }: any) {
     }
 
     return (
-            <SafeAreaView style={styles.container}>
-                <View>
+        <SafeAreaView style={styles.container}>
+        <View>
             <Text>Email:</Text>
             <TextInput 
                 style={styles.input}
@@ -49,8 +49,8 @@ export default function LoginScreen({ navigation }: any) {
             <Button title="Entrar" onPress={handleLogin} />
             <Button title="Registrar" onPress={ () => navigation.navigate('Register') }/>
 
-       </View>
-       </SafeAreaView>
+        </View>
+        </SafeAreaView>
     );
 }
 
