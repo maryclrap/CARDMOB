@@ -9,6 +9,7 @@ import { RootStackParamList, TabParamList } from './types';
 // Telas do app - área não logada.
 import HomeScreen from "../screens/HomeScreen";
 // importar depois que implementar: DetailsScreen, SettingsScreen
+import RegisterScreen from "../screens/RegisterScreen";
 import LoginScreen from "../screens/LoginScreen";
 import CatalogScreen from "../screens/catalog/CatalogScreen";
 import CartScreen from "../screens/cart/CartScreen";
@@ -43,10 +44,9 @@ function TabNavigator() {
             <Tab.Screen
               name="Cart"
               component={CartScreen}
-              options={{title: 'Seu Carrinho'}}
+              options={{title: 'Seu Carrinho', headerShown: true}}
             />
             <Tab.Screen name="Settings" component={HomeScreen} />
-            <Tab.Screen name="Register" component={RegisterScreen} />
             <Tab.Screen
               name="Register"
               component={RegisterScreen}
@@ -82,3 +82,4 @@ export default function AppNavigator() {
   return (
     <StackNavigator />
   );
+};
